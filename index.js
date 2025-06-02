@@ -10,5 +10,5 @@ app.listen(4006, ()=>{
 
 app.use(express.json())
 
-// app.use("/api/auth", authRouter)
+app.use("/api/auth", authRouter)
 // app.use(errorHandler)
