@@ -1,6 +1,8 @@
 
 
 const errorHandler = (err, req, res, next) => {
+
+    // res.send("iiindbhdgf")
     if(res.ok){
         return res.status(200).json({
             status: "success",
