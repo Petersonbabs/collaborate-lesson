@@ -1,5 +1,6 @@
 // WAITING FOR: USER MODEL
 const UserModel = require("../models/user")
+const transporter = require("../services/nodemailer/transporter")
 
 const addNewUser = async (req, res, next)=>{
     try {

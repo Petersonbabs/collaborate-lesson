@@ -1,6 +1,6 @@
 console.log("hello")
 const express = require("express")
-const { default: authRouter } = require("./router/authRouter")
+const  authRouter  = require("./router/authRouter")
 const errorHandler = require("./middlewares/errorHandler")
 const app = express()
 app.listen(4006, ()=>{
