@@ -1,4 +1,5 @@
 // WAITING FOR: USER MODEL
+const UserModel = require("../models/user")
 
 const addNewUser = async (req, res, next)=>{
     try {
