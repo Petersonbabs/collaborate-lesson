@@ -1,68 +1,75 @@
+const nodemailer = require('./nodemailer/transporter');
+const UserModel = require('../models/user');
 
-const { sendOtpEmail } = require('./emailService');
-const { generateOtp } = require('../utils/generateOtp');
-
-
-const models = {
-  buyer: require('../models/Buyer'),
-  seller: require('../models/Seller'),
-  rider: require('../models/Rider'),
-};
-
-/**
- 
-  @param {string} role - 'buyer' | 'seller' | 'rider'
-  @param {string} email
-  @returns {Promise<void>}
- */
-async function sendOtp(role, email) {
-  const Model = models[role.toLowerCase()];
-  if (!Model) throw new Error('Invalid user role');
-
-  const user = await Model.findOne({ email });
-  if (!user) throw new Error(`${role} with this email does not exist`);
-
-  const otp = generateOtp();
-  user.otp = otp;
-  user.otpExpiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
-  await user.save();
-
-  await sendOtpEmail({
-    to: user.email,
-    name: user.name,
-    otp,
-    role,
-  });
+// Generate a random 6-digit OTP
+function generateOtp() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-/**
- 
-  @param {string} role - 'buyer' | 'seller' | 'rider'
-  @param {string} email
-  @param {string} otp
-  @returns {Promise<boolean>}
- */
-async function verifyOtp(role, email, otp) {
-  const Model = models[role.toLowerCase()];
-  if (!Model) throw new Error('Invalid user role');
+// Send OTP to user's email
+async function sendOtp(email) {
+  try {
+    // Find user by email
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      throw new Error('User with this email does not exist');
+    }
 
-  const user = await Model.findOne({ email });
-  if (!user) throw new Error(`${role} with this email does not exist`);
+    // Generate OTP and set expiration (10 minutes from now)
+    const otp = generateOtp();
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
-  const now = Date.now();
-  if (user.otp !== otp || now > user.otpExpiresAt) {
-    throw new Error('Invalid or expired OTP');
+    // Update user with OTP details
+    user.verificationToken = otp;
+    user.verificationExp = otpExpiresAt;
+    await user.save();
+
+    // Send email with OTP
+    const mailOptions = {
+      from: 'faizahojo40@gmail.com',
+      to: email,
+      subject: 'Your Verification OTP',
+      text: `Your OTP is: ${otp}. It will expire in 10 minutes.`,
+      html: `<p>Your OTP is: <strong>${otp}</strong>. It will expire in 10 minutes.</p>`
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('OTP email sent successfully');
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    throw new Error('Failed to send OTP');
   }
+}
 
-  user.isVerified = true;
-  user.otp = null;
-  user.otpExpiresAt = null;
-  await user.save();
+// Verify the OTP entered by user
+async function verifyOtp(email, otp) {
+  try {
+    // Find user by email
+    const user = await UserModel.findOne({ email });
+    if (!user) {
+      throw new Error('User with this email does not exist');
+    }
 
-  return true;
+    // Check if OTP matches and isn't expired
+    const currentTime = new Date();
+    if (user.verificationToken !== otp || currentTime > new Date(user.verificationExp)) {
+      throw new Error('Invalid or expired OTP');
+    }
+
+    // Mark user as verified and clear OTP fields
+    user.isVerified = true;
+    user.verificationToken = null;
+    user.verificationExp = null;
+    await user.save();
+
+    return true;
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    throw new Error('Failed to verify OTP');
+  }
 }
 
 module.exports = {
   sendOtp,
-  verifyOtp,
+  verifyOtp
 };
