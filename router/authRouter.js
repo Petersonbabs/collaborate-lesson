@@ -1,4 +1,4 @@
-import { addNewUser } from "../controllers/userController";
+const {addNewUser } = require("../controllers/userController")
 
 const express = require("express");
 const authRouter = express.Router
