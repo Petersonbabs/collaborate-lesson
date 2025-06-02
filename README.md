@@ -59,12 +59,13 @@ A full-stack food delivery web application inspired by Chowdeck, built using the
 ```bash
 git clone https://github.com/yourusername/chowdeck-clone.git
 cd chowdeck-clone
-
+```
 
 ## Installing Dependensies
 ```bash
 npm install
-
+```
 ## Run the app
 ```bash
 npm run dev
+```
