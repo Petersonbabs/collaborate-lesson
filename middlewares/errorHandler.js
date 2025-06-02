@@ -1,4 +1,4 @@
-import React from 'react'
+
 
 const errorHandler = (err, req, res, next) => {
     if(res.ok){
@@ -11,8 +11,7 @@ const errorHandler = (err, req, res, next) => {
         status: "error",
         message: "something went wrong"
     })
-    next()
+    
 }
-
 
 module.exports = errorHandler
