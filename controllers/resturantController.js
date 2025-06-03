@@ -2,7 +2,7 @@ const restaurantModel = require("../models/RestuarantModel");
 
 const addNewRest = async (req, res)=>{
     try {
-        const resturant = await restuarantModel.create(req.body);
+        const resturant = await restaurantModel.create(req.body);
         if(!resturant) {
             return res.status(400).json({ 
                 status: "error",
